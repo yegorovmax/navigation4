@@ -8,7 +8,7 @@
 import UIKit
 
 class PostViewController: UIViewController {
-    var titlePost: String = "Anonymous"
+    var titlePost: String?
     private lazy var button: UIBarButtonItem = UIBarButtonItem(image: UIImage(systemName: "info.circle"), style: .plain, target: self, action: #selector(clickButton))
 
     override func viewDidLoad() {

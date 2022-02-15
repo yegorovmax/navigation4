@@ -26,7 +26,7 @@ class InfoViewController: UIViewController {
         self.view.backgroundColor = .opaqueSeparator
         self.view.addSubview(self.button)
     
-        self.button.bottomAnchor.constraint(equalTo: self.view.bottomAnchor, constant: -50).isActive = true // низ
+        self.button.bottomAnchor.constraint(equalTo: self.view.bottomAnchor, constant: -50).isActive = true 
         self.button.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 20).isActive = true
         self.button.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -20).isActive = true
         self.button.heightAnchor.constraint(equalToConstant: 50).isActive = true
