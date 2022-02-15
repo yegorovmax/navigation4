@@ -9,7 +9,7 @@ import UIKit
 
 class InfoViewController: UIViewController {
     private lazy var button: UIButton = {
-        let button = UIButton(frame: CGRect(x: 110, y: 110, width: 200, height: 50))
+        let button = UIButton()
         button.backgroundColor = .red
         button.layer.cornerRadius = 12
         button.setTitle("Показать алерт", for: .normal)

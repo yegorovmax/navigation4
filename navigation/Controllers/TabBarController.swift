@@ -2,15 +2,17 @@
 //  TabBarController.swift
 //  navigation
 //
-//  Created by Max Egorov on 2/11/22.
+//  Created by Max Egorov on 2/15/22.
 //
+
 import UIKit
 
-
-final class TabBarController: UITabBarController {
-    private enum TabBarItem: Int {
+class TabBarController: UITabBarController {
+    
+    private enum TabBarItem {
         case feed
         case profile
+        
         var title: String {
             switch self {
             case .feed:
@@ -19,41 +21,36 @@ final class TabBarController: UITabBarController {
                 return "Профиль"
             }
         }
-        var iconName: String {
+        
+        var image: UIImage? {
             switch self {
             case .feed:
-                return "house"
+                return UIImage(systemName: "house")
             case .profile:
-                return "person.crop.circle"
+                return UIImage(systemName: "person.circle")
             }
         }
     }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         self.setupTabBar()
     }
+    
     private func setupTabBar() {
-        let dataSource: [TabBarItem] = [.feed, .profile]
-        self.viewControllers = dataSource.map {
-            switch $0 {
-            case .feed:
-                let feedViewController = FeedViewController()
-                return self.wrappedInNavigationController(with: feedViewController, title: $0.title)
-            case .profile:
-                let profileViewController = ProfileViewController()
-                return self.wrappedInNavigationController(with: profileViewController, title: $0.title)
-            }
-        }
-        self.viewControllers?.enumerated().forEach {
-            $1.tabBarItem.title = dataSource[$0].title
-            $1.tabBarItem.image = UIImage(systemName: dataSource[$0].iconName)
-            $1.tabBarItem.imageInsets = UIEdgeInsets(top: 5, left: .zero, bottom: -5, right: .zero)
-        }
-    }
-    private func wrappedInNavigationController(with: UIViewController, title: Any?) -> UINavigationController {
-        self.navigationController?.pushViewController(with, animated: true)
-        return UINavigationController(rootViewController: with)
+        let items: [TabBarItem] = [.feed, .profile]
         
+        self.viewControllers = items.map({ tabBarIten in
+            switch tabBarIten {
+            case .feed:
+                return UINavigationController(rootViewController: FeedViewController())
+            case .profile:
+                return ProfileViewController()
+            }
+        })
+        self.viewControllers?.enumerated().forEach({ (index, vc) in
+            vc.tabBarItem.title = items[index].title
+            vc.tabBarItem.image = items[index].image
+        })
     }
 }

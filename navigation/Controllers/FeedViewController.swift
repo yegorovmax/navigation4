@@ -11,7 +11,7 @@ class FeedViewController: UIViewController {
     var post = Post(title: "Мой пост")
     
     private lazy var button: UIButton = {
-        let button = UIButton(frame: CGRect(x: 110, y: 110, width: 200, height: 50))
+        let button = UIButton()
         button.backgroundColor = .blue
         button.layer.cornerRadius = 12
         button.setTitle("Перейти на пост", for: .normal)
