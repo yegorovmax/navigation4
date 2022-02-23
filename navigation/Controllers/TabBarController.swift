@@ -16,9 +16,9 @@ class TabBarController: UITabBarController {
         var title: String {
             switch self {
             case .feed:
-                return "Лента"
+                return "Home"
             case .profile:
-                return "Профиль"
+                return "Profile"
             }
         }
         
@@ -45,7 +45,7 @@ class TabBarController: UITabBarController {
             case .feed:
                 return UINavigationController(rootViewController: FeedViewController())
             case .profile:
-                return ProfileViewController()
+                return UINavigationController(rootViewController: ProfileViewController())
             }
         })
         self.viewControllers?.enumerated().forEach({ (index, vc) in
