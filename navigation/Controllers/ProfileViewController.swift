@@ -31,6 +31,7 @@ class ProfileViewController: UIViewController {
     
     private lazy var titleTextField: UITextField = {
         let textField = UITextField()
+       // textField.isHidden = true
         textField.translatesAutoresizingMaskIntoConstraints = false
         textField.backgroundColor = .white
         textField.textColor = .black
@@ -51,12 +52,17 @@ class ProfileViewController: UIViewController {
     private lazy var titleButton: UIButton = {
         let button = UIButton()
         button.backgroundColor = .blue
-        button.layer.cornerRadius = 12 
+        button.layer.cornerRadius = 4
         button.setTitle("Change title", for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 24)
         button.addTarget(self, action: #selector(titleButtonAction), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
+        button.layer.shadowOffset = CGSize(width: 4.0, height: 4.0)
+        button.layer.shadowRadius = 4.0
+        button.layer.shadowColor = UIColor.black.cgColor
+        button.layer.shadowOpacity = 0.7
+        button.layer.shouldRasterize = true
      
         return button
     }()
