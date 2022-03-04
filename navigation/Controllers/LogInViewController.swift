@@ -106,6 +106,7 @@ class LogInViewController: UIViewController {
             button.alpha = 1.0
         }
         button.setTitleColor(.white, for: .normal)
+        button.addTarget(self, action: #selector(self.didTapLogInButton), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.clipsToBounds = true
 
@@ -117,7 +118,7 @@ class LogInViewController: UIViewController {
         view.addGestureRecognizer(tap)
         super.viewDidLoad()
         view.backgroundColor = .white
-        tabBarController?.tabBar.isHidden = true
+        tabBarController?.tabBar.isHidden = false
         setupView()
         setupConstraints()
 
@@ -184,4 +185,9 @@ class LogInViewController: UIViewController {
         scrollView.contentInset = contentInsets
         scrollView.scrollIndicatorInsets = contentInsets
     }
+    @objc private func didTapLogInButton(){
+        let profileViewController = ProfileViewController()
+        self.navigationController?.pushViewController(profileViewController, animated: true)
+    }
+
 }
