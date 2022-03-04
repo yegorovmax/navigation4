@@ -12,6 +12,7 @@ class TabBarController: UITabBarController {
     private enum TabBarItem {
         case feed
         case profile
+        case articles
         
         var title: String {
             switch self {
@@ -19,6 +20,8 @@ class TabBarController: UITabBarController {
                 return "Home"
             case .profile:
                 return "Profile"
+            case .articles:
+                return "Articles"
             }
         }
         
@@ -28,6 +31,8 @@ class TabBarController: UITabBarController {
                 return UIImage(systemName: "house")
             case .profile:
                 return UIImage(systemName: "person.circle")
+            case .articles:
+                return UIImage(systemName: "flame.circle")
             }
         }
     }
@@ -38,12 +43,14 @@ class TabBarController: UITabBarController {
     }
     
     private func setupTabBar() {
-        let items: [TabBarItem] = [.feed, .profile]
+        let items: [TabBarItem] = [.feed, .articles, .profile]
         
         self.viewControllers = items.map({ tabBarIten in
             switch tabBarIten {
             case .feed:
                 return UINavigationController(rootViewController: FeedViewController())
+            case .articles:
+                return UINavigationController(rootViewController: ArticlesViewController())
             case .profile:
                 //                return UINavigationController(rootViewController: ProfileViewController())
 
