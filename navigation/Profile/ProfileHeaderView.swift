@@ -107,18 +107,102 @@ class ProfileHeaderView: UIView, UITextFieldDelegate {
         return button
     }()
     
+    private lazy var infoStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .horizontal
+        stackView.spacing = 20
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        return stackView
+    }()
+    
+    private lazy var statusButton: UIButton = {
+        let button = UIButton()
+        button.backgroundColor = .blue
+        button.setTitle("Show status", for: .normal)
+        button.tintColor = .white
+        
+        button.layer.cornerRadius = 16
+        button.layer.shadowOffset.width = 4
+        button.layer.shadowOffset.height = 4
+        button.layer.shadowRadius = 4
+        button.layer.shadowColor = UIColor.black.cgColor
+        button.layer.shadowOpacity = 0.7
+        
+        button.addTarget(self, action: #selector(self.buttonAction), for: .touchUpInside)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+  /*  private lazy var userStatus: UITextField = {
+        let textField = UITextField()
+        textField.isHidden = false
+        textField.text = "Waiting for something..."
+        textField.tintColor = .darkGray
+        textField.translatesAutoresizingMaskIntoConstraints = false
+        return textField
+    }()*/
+    private lazy var userPhoto: UIImageView = {
+        let imageView = UIImageView(image: UIImage(named: "picon.jpg"))
+        imageView.layer.borderWidth = 3.0
+        imageView.layer.borderColor = UIColor.white.cgColor
+        imageView.layer.cornerRadius = 50
+        imageView.layer.masksToBounds = true
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        return imageView
+    }()
+    private lazy var labelsStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.distribution = .fillEqually
+        stackView.spacing = 5
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        return stackView
+    }()
+    
     private var buttonTopConstrain: NSLayoutConstraint?
     weak var delegate: ProfileHeaderViewProtocol?
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        createSubviews()
+        //self.createSubviews()
+        draw()
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("required init error")
     }
   
+    private func draw() {
+        self.addSubview(self.infoStackView)
+        self.addSubview(self.statusButton)
+        self.addSubview(self.statusTextField)
+        self.infoStackView.addArrangedSubview(self.userPhoto)
+        self.infoStackView.addArrangedSubview(self.labelsStackView)
+        self.labelsStackView.addArrangedSubview(self.fullNameLabel)
+        self.labelsStackView.addArrangedSubview(self.statusTextField)
+        
+        let topConstraint = self.infoStackView.topAnchor.constraint(equalTo: self.topAnchor)
+        let leadingConstraint = self.infoStackView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 16)
+        let trailingConstraint = self.infoStackView.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -16)
+
+        let userPhotoAspectRatio = self.userPhoto.heightAnchor.constraint(equalTo: self.userPhoto.widthAnchor, multiplier: 1.0)
+       
+        self.buttonTopConstrain = self.statusButton.topAnchor.constraint(equalTo: self.infoStackView.bottomAnchor, constant: 16)
+        self.buttonTopConstrain?.priority = UILayoutPriority(rawValue: 999)
+        let leadingButtonConstrain = self.statusButton.leadingAnchor.constraint(equalTo: self.infoStackView.leadingAnchor)
+        let trailingButtonConstrain = self.statusButton.trailingAnchor.constraint(equalTo: self.infoStackView.trailingAnchor)
+        let bottomButtonConstrain = self.statusButton.bottomAnchor.constraint(equalTo: self.bottomAnchor)
+        let heightButtonConstrain = self.statusButton.heightAnchor.constraint(equalToConstant: 50)
+        
+        NSLayoutConstraint.activate([
+            topConstraint, leadingConstraint, trailingConstraint,
+            userPhotoAspectRatio,
+            self.buttonTopConstrain, leadingButtonConstrain,
+            trailingButtonConstrain, bottomButtonConstrain, heightButtonConstrain
+        ].compactMap({ $0 }))
+    }
+    
+    
+  /*
     func createSubviews() {
         self.addSubview(firstStackView)
         self.addSubview(statusTextField)
@@ -153,12 +237,17 @@ class ProfileHeaderView: UIView, UITextFieldDelegate {
             buttonHeightConstraint, buttonBottomConstraint
         ].compactMap( {$0} ))
     }
-    
+    */
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         self.endEditing(true)
         return false
     }
-    
+    @objc private func didTapStatusButton() {
+        let userText = statusTextField.text
+        if userText != nil {
+            print(userText!)
+        }
+    }
     @objc private func buttonAction() {
         let topConstrain = self.statusTextField.topAnchor.constraint(equalTo: self.firstStackView.bottomAnchor, constant: -10)
         let leadingConstrain = self.statusTextField.leadingAnchor.constraint(equalTo: self.labelStackView.leadingAnchor)

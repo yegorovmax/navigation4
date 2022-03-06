@@ -7,19 +7,28 @@
 
 import UIKit
 
-class ProfileViewController: UIViewController {
+final class ProfileViewController: UIViewController {
     
     private lazy var profileHeaderView: ProfileHeaderView = {
-        let view = ProfileHeaderView(frame: .zero) 
-        view.delegate = self
+        let view = ProfileHeaderView(frame: .zero)
         view.translatesAutoresizingMaskIntoConstraints = false
-        
         return view
     }()
     
-    private var heightConstraint: NSLayoutConstraint?
+    private lazy var tableView: UITableView = {
+        let tableView = UITableView(frame: .zero)
+        tableView.backgroundColor = .white
+        tableView.dataSource = self
+        tableView.delegate = self
+        tableView.rowHeight = 130
+        tableView.register(PhotosTableViewCell.self, forCellReuseIdentifier: "PhotosTableViewCell")
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        return tableView
+    }()
     
-    private lazy var titleStackView: UIStackView = {
+    //private var heightConstraint: NSLayoutConstraint?
+    
+/*    private lazy var titleStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.translatesAutoresizingMaskIntoConstraints = false
         stackView.axis = .vertical
@@ -66,40 +75,44 @@ class ProfileViewController: UIViewController {
      
         return button
     }()
-
+*/
     override func viewDidLoad() {
-        let tap = UITapGestureRecognizer(target: view, action: #selector(UIView.endEditing))
-        view.addGestureRecognizer(tap)
         super.viewDidLoad()
-        setupNavigationBar()
-        self.view.addSubview(self.profileHeaderView)
-        setupView()
-        setTitleStackView()
+        self.view.addSubview(self.tableView)
+        self.setupView()
+        navigationItem.title = "Profile"
+        view.backgroundColor = .lightGray
+        navigationController?.navigationBar.prefersLargeTitles = false
+        navigationController?.navigationBar.isHidden = false
     }
     
     private func setupNavigationBar() {
            self.navigationItem.title = "Profile"
        }
     
-    
-    internal override func viewWillLayoutSubviews() {
-        profileHeaderView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        profileHeaderView.frame = CGRect(origin: CGPoint.zero, size: view.frame.size)
-    }
-    
     private func setupView() {
-        self.view.backgroundColor = .lightGray
+        self.view.backgroundColor = .white
         
-        let viewTopConstraint = self.profileHeaderView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor)
-        let viewLeadingConstraint = self.profileHeaderView.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor)
-        let viewTrailingConstraint = self.profileHeaderView.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor)
-        self.heightConstraint = self.profileHeaderView.heightAnchor.constraint(equalToConstant: 220)
+        self.view.addSubview(self.profileHeaderView)
+        
+        let topConstraint = self.profileHeaderView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor)
+        let leadingConstraint = self.profileHeaderView.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor)
+        let trailingConstraint = self.profileHeaderView.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor)
+        let heightConstraint = self.profileHeaderView.heightAnchor.constraint(equalToConstant: 170)
+        
+        let tableViewTop = self.tableView.topAnchor.constraint(equalTo: self.profileHeaderView.bottomAnchor, constant: 20)
+        let tableViewLeft = self.tableView.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor)
+        let tableViewRight = self.tableView.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor)
+        let tableViewHeight = self.tableView.heightAnchor.constraint(equalToConstant: 130)
+        
         NSLayoutConstraint.activate([
-            viewTopConstraint, viewLeadingConstraint, viewTrailingConstraint, self.heightConstraint
-        ].compactMap( {$0} ))
+            topConstraint, leadingConstraint, trailingConstraint, heightConstraint, tableViewTop, tableViewLeft, tableViewRight, tableViewHeight
+        ])
     }
+    
+}
 
-    func setTitleStackView() {
+/*    func setTitleStackView() {
         self.view.addSubview(self.titleStackView)
         self.titleStackView.addArrangedSubview(titleTextField)
         self.titleStackView.addArrangedSubview(titleButton)
@@ -122,7 +135,7 @@ class ProfileViewController: UIViewController {
         titleTextField.text = nil
     }
 }
-extension ProfileViewController: ProfileHeaderViewProtocol {
+extension ProfileViewController: ProfileHeaderViewProtocol{
     func buttonAction(inputTextIsVisible: Bool, completion: @escaping () -> Void) {
         self.heightConstraint?.constant = inputTextIsVisible ? 250 : 220
 
@@ -131,5 +144,22 @@ extension ProfileViewController: ProfileHeaderViewProtocol {
         } completion: { _ in
             completion()
         }
+    } */
+
+
+extension ProfileViewController: UITableViewDataSource, UITableViewDelegate {
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return 1
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = self.tableView.dequeueReusableCell(withIdentifier: "PhotosTableViewCell", for: indexPath) as! PhotosTableViewCell
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let photosViewController = PhotosViewController()
+        navigationController?.pushViewController(photosViewController, animated: true)
     }
 }

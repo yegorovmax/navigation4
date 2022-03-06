@@ -15,8 +15,8 @@ final class ArticlesViewController: UIViewController {
         tableView.dataSource = self
         tableView.delegate = self
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "DefaultCell")
-        tableView.register(PhotosTableViewCell.self, forCellReuseIdentifier: "PostCell")
-        tableView.register(PhotosTableViewCell.self, forCellReuseIdentifier: "ProfileHeadCell")
+        tableView.register(PhotosListViewCell.self, forCellReuseIdentifier: "PostCell")
+        tableView.register(PhotosListViewCell.self, forCellReuseIdentifier: "ProfileHeadCell")
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 44
         
@@ -76,18 +76,18 @@ extension ArticlesViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         if indexPath.row == 0 {
-            let cell = tableView.dequeueReusableCell(withIdentifier: "ProfileHeadCell", for: indexPath) as! PhotosTableViewCell
+            let cell = tableView.dequeueReusableCell(withIdentifier: "ProfileHeadCell", for: indexPath) as! PhotosListViewCell
             
             return cell
         } else {
 
-            guard let cell = tableView.dequeueReusableCell(withIdentifier: "PostCell", for: indexPath) as? PhotosTableViewCell else {
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: "PostCell", for: indexPath) as? PhotosListViewCell else {
                 let cell = tableView.dequeueReusableCell(withIdentifier: "DefaultCell", for: indexPath)
                 return cell
             }
             
             let article = self.dataSource[indexPath.row - 1]
-            let viewModel = PhotosTableViewCell.ViewModel(title: article.title, description: article.description, image: article.image, likes: article.likes, views: article.views)
+            let viewModel = PhotosListViewCell.ViewModel(title: article.title, description: article.description, image: article.image, likes: article.likes, views: article.views)
             cell.setup(with: viewModel)
             
             return cell
