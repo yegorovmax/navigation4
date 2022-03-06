@@ -43,7 +43,7 @@ class TabBarController: UITabBarController {
     }
     
     private func setupTabBar() {
-        let items: [TabBarItem] = [.feed, .articles, .profile]
+        let items: [TabBarItem] = [.feed, /*.articles,*/ .profile]
         
         self.viewControllers = items.map({ tabBarIten in
             switch tabBarIten {
@@ -52,7 +52,7 @@ class TabBarController: UITabBarController {
             case .articles:
                 return UINavigationController(rootViewController: ArticlesViewController())
             case .profile:
-                //                return UINavigationController(rootViewController: ProfileViewController())
+                //return UINavigationController(rootViewController: ProfileViewController())
 
                 return UINavigationController(rootViewController: LogInViewController())
             }

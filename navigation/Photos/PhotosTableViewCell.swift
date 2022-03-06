@@ -7,109 +7,163 @@
 
 import UIKit
 
+protocol PhotosTableViewCellProtocol: AnyObject {
+    func delegateButtonAction(cell: PhotosTableViewCell)
+}
+
 class PhotosTableViewCell: UITableViewCell {
     
-    private let itemsPerRow: CGFloat = 4
+    private enum Constant {
+        static let itemCount: CGFloat = 4
+    }
     
-    private lazy var layoutTableViewCell: UICollectionViewFlowLayout = {
-        let layout = UICollectionViewFlowLayout()
-        layout.scrollDirection = .horizontal
-        layout.minimumInteritemSpacing = 8
-        return layout
+    weak var delegate: PhotosTableViewCellProtocol?
+    
+    private lazy var backView: UIView = {
+        let view = UIView()
+        view.clipsToBounds = true
+        view.backgroundColor = .white
+        view.translatesAutoresizingMaskIntoConstraints = false
+        
+        return view
     }()
     
-    private lazy var photosCVTableViewCell: UICollectionView = {
-        let photosCV = UICollectionView(frame: .zero,
-                                        collectionViewLayout: layoutTableViewCell)
-        photosCV.backgroundColor = .white
-        photosCV.delegate = self
-        photosCV.dataSource = self
-        photosCV.register(PhotosCVCellForTableViewCell.self,
-                          forCellWithReuseIdentifier: "PhotosCVCellForTableViewCell")
-        photosCV.clipsToBounds = true
-        photosCV.translatesAutoresizingMaskIntoConstraints = false
-        return photosCV
+    private lazy var stackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        stackView.axis = .horizontal
+        stackView.distribution = .fill
+        stackView.setContentCompressionResistancePriority(UILayoutPriority(250), for: .vertical)
+        
+        return stackView
     }()
     
-    private lazy var label: UILabel = {
+    private lazy var titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "Photos"
-        label.tintColor = .black
-        label.font = UIFont(name: "HelveticaNeue-Bold", size: 24)
-        label.translatesAutoresizingMaskIntoConstraints = false
+        label.text  = "Photos"
+        label.textColor = .black
+        label.font = UIFont.boldSystemFont(ofSize: 24.0)
+        label.setContentCompressionResistancePriority(UILayoutPriority(250), for: .horizontal)
+        
         return label
     }()
-
-    private lazy var tableViewBarButton: UIButton = {
+    
+    private lazy var transitionButton: UIButton = {
         let button = UIButton()
         button.setImage(UIImage(systemName: "arrow.right"), for: .normal)
         button.tintColor = .black
+        button.setTitleColor(.black, for: .normal)
+        button.addTarget(self, action: #selector(buttonAction), for: .touchUpInside)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 24)
         button.translatesAutoresizingMaskIntoConstraints = false
+        button.setContentCompressionResistancePriority(UILayoutPriority(250), for: .horizontal)
+        
         return button
+    }()
+    
+    private lazy var layout: UICollectionViewFlowLayout = {
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .horizontal
+        layout.minimumInteritemSpacing = 8
+    
+        return layout
+    }()
+    
+    private lazy var photoCollectionView: UICollectionView = {
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        collectionView.dataSource = self
+        collectionView.delegate = self
+        collectionView.register(PhotosCollectionViewCell.self, forCellWithReuseIdentifier: "PhotosCollection")
+        stackView.setContentCompressionResistancePriority(UILayoutPriority(750), for: .vertical)
+        
+        return collectionView
     }()
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        setUpCell()
-        setUpConstraints()
+        setupView()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func setUpCell() {
-        addSubview(label)
-        addSubview(tableViewBarButton)
-        addSubview(photosCVTableViewCell)
+    private func setupView() {
+        self.backgroundColor = .systemGray6
+        self.contentView.addSubview(self.backView)
+        self.backView.addSubview(self.stackView)
+        self.stackView.addArrangedSubview(self.titleLabel)
+        self.stackView.addArrangedSubview(self.transitionButton)
+        self.backView.addSubview(photoCollectionView)
+        setupConstraints()
     }
     
-    func setUpConstraints() {
-        let labelTop = label.topAnchor.constraint(equalTo: self.topAnchor, constant: 12)
-        let labelLeft = label.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 12)
-
-
-        let photosCVTableViewCellTop = photosCVTableViewCell.topAnchor.constraint(equalTo: self.label.bottomAnchor, constant: 12)
-        let photosCVTableViewCellLeft = photosCVTableViewCell.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 12)
-        let photosCVTableViewCellRight = photosCVTableViewCell.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -12)
-        let photosCVTableViewCellBottom = photosCVTableViewCell.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -12)
+    private func setupConstraints() {
+        let topConstraint = self.backView.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 16)
+        let leadingConstraint = self.backView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor)
+        let trailingConstraint = self.backView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor)
+        let bottomConstraint = self.backView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor, constant: -16)
         
-
-        let tableViewBarButtonCentreY = tableViewBarButton.centerYAnchor.constraint(equalTo: self.label.centerYAnchor)
-        let tableViewBarButtonRight = tableViewBarButton.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -12)
-        let tableViewBarButtonAspectRatio = tableViewBarButton.heightAnchor.constraint(equalTo: self.tableViewBarButton.widthAnchor, multiplier: 1.0)
+        let stackViewTopConstraint = self.stackView.topAnchor.constraint(equalTo: self.backView.topAnchor, constant: 12)
+        let stackViewLeadingConstraint = self.stackView.leadingAnchor.constraint(equalTo: self.backView.leadingAnchor, constant: 12)
+        let stackViewTrailingConstraint = self.stackView.trailingAnchor.constraint(equalTo: self.backView.trailingAnchor, constant: -12)
         
-        NSLayoutConstraint.activate([labelTop, labelLeft,
-                                     photosCVTableViewCellTop, photosCVTableViewCellLeft, photosCVTableViewCellRight, photosCVTableViewCellBottom,
-                                     tableViewBarButtonCentreY, tableViewBarButtonRight, tableViewBarButtonAspectRatio
-                                    ])
+        let transitionButtonHeight = self.transitionButton.heightAnchor.constraint(equalTo: self.stackView.heightAnchor, multiplier: 1)
+        
+        let photoCollectionViewTopConstraint = self.photoCollectionView.topAnchor.constraint(equalTo: self.stackView.bottomAnchor)
+        let photoCollectionViewLeadingConstraint = self.photoCollectionView.leadingAnchor.constraint(equalTo: self.backView.leadingAnchor, constant: 12)
+        let photoCollectionViewTrailingConstraint = self.photoCollectionView.trailingAnchor.constraint(equalTo: self.backView.trailingAnchor, constant: -12)
+        let photoCollectionViewConstraint = self.photoCollectionView.bottomAnchor.constraint(equalTo: self.backView.bottomAnchor, constant: -12)
+        let photoCollectionViewHeight = self.photoCollectionView.heightAnchor.constraint(equalTo: self.contentView.widthAnchor, multiplier: 0.25)
+        
+        NSLayoutConstraint.activate([
+            topConstraint, leadingConstraint, bottomConstraint, trailingConstraint,
+            stackViewTopConstraint, stackViewLeadingConstraint, stackViewTrailingConstraint,
+            photoCollectionViewTopConstraint, photoCollectionViewLeadingConstraint,
+            photoCollectionViewTrailingConstraint, photoCollectionViewConstraint,
+            photoCollectionViewHeight, transitionButtonHeight
+        ])
     }
     
-    private func itemSize(width: CGFloat, height: CGFloat, spacing: CGFloat) -> CGSize{
-        let neededWidth = width - spacing * 4
-        let itemWidth = neededWidth / itemsPerRow
-        return CGSize(width: itemWidth, height: height)
+    @objc private func buttonAction() {
+        delegate?.delegateButtonAction(cell: self)
+    }
+    
+    private func itemSize(for width: CGFloat, with spacing: CGFloat) -> CGSize {
+        let needWidth = width - 2 * spacing
+        let itemWidth = floor(needWidth / Constant.itemCount)
+        
+        return CGSize(width: itemWidth, height: itemWidth)
     }
 }
 
-
-extension PhotosTableViewCell: UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
+extension PhotosTableViewCell: UICollectionViewDelegate, UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 4
+        
+        return myImage.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PhotosCVCellForTableViewCell", for: indexPath) as! PhotosCVCellForTableViewCell
-        cell.backgroundColor = .red
-        cell.layer.cornerRadius = 6
-        cell.clipsToBounds = true
-        cell.imageCVCellForTVC.image = photosArray[indexPath.row]
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PhotosCollection", for: indexPath) as! PhotosCollectionViewCell
+        
+        DispatchQueue.main.async {
+            let img = myImage[indexPath.row]
+            let viewModel = PhotosCollectionViewCell.ViewModel(image: img.image)
+            cell.setup(with: viewModel)
+        }
+        
         return cell
     }
+}
+
+extension PhotosTableViewCell : UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let spacing = (collectionView.collectionViewLayout as? UICollectionViewFlowLayout)!.minimumInteritemSpacing
-        return self.itemSize(width: collectionView.frame.width, height: collectionView.frame.height, spacing: spacing)
+        let spacing = (collectionView.collectionViewLayout as? UICollectionViewFlowLayout)?.minimumInteritemSpacing
+        
+        return self.itemSize(for: collectionView.frame.width, with: spacing ?? 0)
     }
 }
+

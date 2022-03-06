@@ -70,7 +70,7 @@ final class ArticlesViewController: UIViewController {
 extension ArticlesViewController: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 21  // self.dataSource.count
+        return self.dataSource.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -87,12 +87,10 @@ extension ArticlesViewController: UITableViewDataSource, UITableViewDelegate {
             }
             
             let article = self.dataSource[indexPath.row - 1]
-            let viewModel = PhotosListViewCell.ViewModel(title: article.title, description: article.description, image: article.image, likes: article.likes, views: article.views)
+            let viewModel = PhotosListViewCell.ViewModel(author: article.title, description: article.description, image: article.image, likes: article.likes, views: article.views)
             cell.setup(with: viewModel)
             
             return cell
         }
     }
 }
-
-

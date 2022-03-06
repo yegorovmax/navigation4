@@ -9,74 +9,96 @@ import UIKit
 
 class PhotosViewController: UIViewController {
     
-    private let itemsPerRow: CGFloat = 3
-    private let sectionInsets = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
+    private enum Constant {
+        static let itemCount: CGFloat = 3
+    }
     
     private lazy var layout: UICollectionViewFlowLayout = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
         layout.minimumInteritemSpacing = 8
         layout.minimumLineSpacing = 8
+        
         return layout
     }()
-    
-    private lazy var photosCV: UICollectionView = {
-        let photosCV = UICollectionView(frame: .zero,
-                                        collectionViewLayout: layout)
-        photosCV.backgroundColor = .white
-        photosCV.delegate = self
-        photosCV.dataSource = self
-        photosCV.register(PhotosCollectionViewCell.self,
-                          forCellWithReuseIdentifier: "PhotosCollectionViewCell")
-        photosCV.translatesAutoresizingMaskIntoConstraints = false
-        return photosCV
+
+    private lazy var photoCollectionView: UICollectionView = {
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        collectionView.dataSource = self
+        collectionView.delegate = self
+        collectionView.register(PhotosCollectionViewCell.self, forCellWithReuseIdentifier: "PhotosCollection")
+        collectionView.backgroundColor = .white
+        
+        return collectionView
     }()
-    
+        
     override func viewDidLoad() {
         super.viewDidLoad()
-        setUpView()
-        setUpConstraint()
+        setupCollectionView()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.tabBarController?.tabBar.isHidden = false
+        self.navigationController?.navigationBar.isHidden = false
+        self.navigationItem.title = "Photo Gallery"
+    }
         
-        title = "Photo Gallery"
-        view.backgroundColor = .white
-        navigationController?.navigationBar.isHidden = false
-        navigationController?.navigationBar.prefersLargeTitles = false
-    }
-    
-    private func setUpView() {
-        view.addSubview(photosCV)
-    }
-    
-    private func setUpConstraint() {
-        let photosCVTop = photosCV.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor)
-        let photosCVLeft = photosCV.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 8)
-        let photosCVRight = photosCV.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -8)
-        let photosCVBottom = photosCV.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+    private func setupCollectionView() {
+        self.view.addSubview(self.photoCollectionView)
         
-        NSLayoutConstraint.activate([photosCVTop, photosCVLeft, photosCVRight, photosCVBottom])
+        let topConstraint = self.photoCollectionView.topAnchor.constraint(equalTo: self.view.topAnchor)
+        let leadingConstraint = self.photoCollectionView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor)
+        let trailingConstraint = self.photoCollectionView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor)
+        let bottomConstraint = self.photoCollectionView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
+        
+        NSLayoutConstraint.activate([
+            topConstraint, leadingConstraint, trailingConstraint, bottomConstraint
+        ])
     }
     
-    private func itemSize(for width: CGFloat, with spacing: CGFloat) -> CGSize{
-        let neededWidth = width - 2 * spacing
-        let itemWidth = neededWidth / itemsPerRow
+    private func itemSize(for width: CGFloat, with spacing: CGFloat) -> CGSize {
+        let needWidth = width - 4 * spacing
+        let itemWidth = floor(needWidth / Constant.itemCount)
+        
         return CGSize(width: itemWidth, height: itemWidth)
     }
 }
 
-extension PhotosViewController: UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
+// MARK: - Extension UICollectionView Data Source
+
+extension PhotosViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+    
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+           return 1
+       }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        photosArray.count
+        
+        return myImage.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PhotosCollectionViewCell", for: indexPath) as! PhotosCollectionViewCell
-        cell.imageCVCell.image = photosArray[indexPath.item]
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PhotosCollection", for: indexPath) as! PhotosCollectionViewCell
+        
+        DispatchQueue.main.async {
+            let img = myImage[indexPath.row]
+            let viewModel = PhotosCollectionViewCell.ViewModel(image: img.image)
+            cell.setup(with: viewModel)
+        }
+        
         return cell
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let spacing = (collectionView.collectionViewLayout as? UICollectionViewFlowLayout)!.minimumLineSpacing
-        return self.itemSize(for: collectionView.frame.width, with: spacing)
+        let spacing = (collectionView.collectionViewLayout as? UICollectionViewFlowLayout)?.minimumLineSpacing
+
+        return self.itemSize(for: collectionView.frame.width, with: spacing ?? 0)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        
+        return UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
     }
 }

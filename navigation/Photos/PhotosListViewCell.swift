@@ -10,11 +10,11 @@ import UIKit
 class PhotosListViewCell: UITableViewCell {
     
     struct ViewModel: ViewModelProtocol {
-        var title: String // никнейм автора публикации
-        var description: String // текст публикации
-        var image: String // имя картинки из каталога Assets.xcassets
-        var likes: String // количество лайков
-        var views: String // количество просмотров
+        var author: String
+        var description: String
+        var image: String
+        var likes: String
+        var views: String
     }
     
     private lazy var backView: UIView = {
@@ -26,7 +26,7 @@ class PhotosListViewCell: UITableViewCell {
         return view
     }()
     
-    private lazy var titleLabel: UILabel = {
+    private lazy var authorLabel: UILabel = {
         let label = UILabel()
         label.backgroundColor = .clear
         label.numberOfLines = 2
@@ -44,7 +44,7 @@ class PhotosListViewCell: UITableViewCell {
         imageView.contentMode = .scaleAspectFill
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.backgroundColor = .black
-        imageView.contentMode = .scaleAspectFit
+//        imageView.contentMode = .scaleAspectFit
         
         return imageView
     }()
@@ -73,34 +73,6 @@ class PhotosListViewCell: UITableViewCell {
         return stackView
     }()
     
-    private lazy var likeTitle: UILabel = {
-        let label = UILabel()
-        label.text  = "Likes: "
-        label.backgroundColor = .clear
-        label.font = UIFont.systemFont(ofSize: 16)
-        label.preferredMaxLayoutWidth = self.frame.size.width
-        label.textColor = .black
-        label.setContentHuggingPriority(UILayoutPriority(1), for: .horizontal)
-        label.setContentCompressionResistancePriority(UILayoutPriority(250), for: .vertical)
-        label.translatesAutoresizingMaskIntoConstraints = false
-        
-        return label
-    }()
-    
-    private lazy var viewTitle: UILabel = {
-        let label = UILabel()
-        label.text  = "Views: "
-        label.backgroundColor = .clear
-        label.font = UIFont.systemFont(ofSize: 16)
-        label.preferredMaxLayoutWidth = self.frame.size.width
-        label.textColor = .black
-        label.setContentCompressionResistancePriority(UILayoutPriority(250), for: .vertical)
-        label.translatesAutoresizingMaskIntoConstraints = false
-        
-        return label
-    }()
-    
-    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         self.setupView()
@@ -112,21 +84,17 @@ class PhotosListViewCell: UITableViewCell {
     
     override func prepareForReuse() {
         super.prepareForReuse()
-        self.titleLabel.text = nil
+        self.authorLabel.text = nil
         self.postImageView.image = nil
         self.descriptionLabel.text = nil
-        self.likeTitle.text = nil
-        self.viewTitle.text = nil
     }
     
     private func setupView() {
         self.contentView.addSubview(self.backView)
-        self.backView.addSubview(self.titleLabel)
+        self.backView.addSubview(self.authorLabel)
         self.backView.addSubview(self.postImageView)
         self.backView.addSubview(self.descriptionLabel)
         self.backView.addSubview(self.likeStackView)
-        self.likeStackView.addArrangedSubview(self.likeTitle)
-        self.likeStackView.addArrangedSubview(self.viewTitle)
         setupConstraints()
     }
     
@@ -136,11 +104,11 @@ class PhotosListViewCell: UITableViewCell {
         let trailingConstraint = self.backView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor)
         let bottomConstraint = self.backView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor)
         
-        let topConstraintTitleLabel = self.titleLabel.topAnchor.constraint(equalTo: self.backView.topAnchor, constant: 16)
-        let leadingConstraintTitleLabel = self.titleLabel.leadingAnchor.constraint(equalTo: self.backView.leadingAnchor, constant: 16)
-        let trailingConstraintTitleLabel = self.titleLabel.trailingAnchor.constraint(equalTo: self.backView.trailingAnchor, constant: -16)
+        let topConstraintAuthorLabel = self.authorLabel.topAnchor.constraint(equalTo: self.backView.topAnchor, constant: 16)
+        let leadingConstraintAuthorLabel = self.authorLabel.leadingAnchor.constraint(equalTo: self.backView.leadingAnchor, constant: 16)
+        let trailingConstraintAuthorLabel = self.authorLabel.trailingAnchor.constraint(equalTo: self.backView.trailingAnchor, constant: -16)
         
-        let topConstraintPostImageView = self.postImageView.topAnchor.constraint(equalTo: self.titleLabel.bottomAnchor, constant: 12)
+        let topConstraintPostImageView = self.postImageView.topAnchor.constraint(equalTo: self.authorLabel.bottomAnchor, constant: 12)
         let leadingConstraintPostImageView = self.postImageView.leadingAnchor.constraint(equalTo: self.backView.leadingAnchor)
         let trailingConstraintPostImageView = self.postImageView.trailingAnchor.constraint(equalTo: self.backView.trailingAnchor)
         let widthPostImageView = self.postImageView.heightAnchor.constraint(equalTo: self.backView.widthAnchor, multiplier: 1.0)
@@ -156,25 +124,24 @@ class PhotosListViewCell: UITableViewCell {
         
         NSLayoutConstraint.activate([
             topConstraint, leadingConstraint, bottomConstraint, trailingConstraint,
-            topConstraintTitleLabel, topConstraintPostImageView,widthPostImageView,
-            leadingConstraintTitleLabel, trailingConstraintTitleLabel,
+            topConstraintAuthorLabel, topConstraintPostImageView,widthPostImageView,
+            leadingConstraintAuthorLabel, trailingConstraintAuthorLabel,
             topConstraintDescriptionLabel, leadingConstraintDescriptionLabell,
             trailingConstraintDescriptionLabel, topConstraintLikeStackView,
             leadingConstraintLikeStackView, trailingConstraintLikeStackView,
             bottomConstraintLikeStackView, leadingConstraintPostImageView,
-            trailingConstraintPostImageView])
+            trailingConstraintPostImageView
+        ])
     }
 }
 
-extension PhotosListViewCell: ViewModelProtocol {
+extension PhotosListViewCell: Setupable {
     
     func setup(with viewModel: ViewModelProtocol) {
         guard let viewModel = viewModel as? ViewModel else { return }
-        
-        self.titleLabel.text = viewModel.title
+
+        self.authorLabel.text = viewModel.author
         self.postImageView.image = UIImage(named: viewModel.image)
         self.descriptionLabel.text = viewModel.description
-        self.likeTitle.text? += viewModel.likes
-        self.viewTitle.text? += viewModel.views
     }
 }

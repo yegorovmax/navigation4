@@ -9,157 +9,180 @@ import UIKit
 
 final class ProfileViewController: UIViewController {
     
-    private lazy var profileHeaderView: ProfileHeaderView = {
-        let view = ProfileHeaderView(frame: .zero)
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
+    private var dataSource: [Articles.Article] = []
+    
+    private lazy var jsonDecoder: JSONDecoder = {
+        return JSONDecoder()
     }()
     
     private lazy var tableView: UITableView = {
-        let tableView = UITableView(frame: .zero)
-        tableView.backgroundColor = .white
+        let tableView = UITableView()
+        tableView.backgroundColor = .systemGray6
+        tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.dataSource = self
         tableView.delegate = self
-        tableView.rowHeight = 130
-        tableView.register(PhotosTableViewCell.self, forCellReuseIdentifier: "PhotosTableViewCell")
-        tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "DefaultCell")
+        tableView.register(PhotosTableViewCell.self, forCellReuseIdentifier: "PhotoCell")
+        tableView.register(PhotosListViewCell.self, forCellReuseIdentifier: "PostCell")
+        tableView.rowHeight = UITableView.automaticDimension
+        tableView.estimatedRowHeight = 44
+        
         return tableView
     }()
     
-    //private var heightConstraint: NSLayoutConstraint?
-    
-/*    private lazy var titleStackView: UIStackView = {
-        let stackView = UIStackView()
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        stackView.axis = .vertical
-        stackView.distribution = .fill
-        stackView.spacing = 10
-
-        return stackView
+    private lazy var tableHeaderView: ProfileHeaderView = {
+        let view = ProfileHeaderView(frame: .zero)
+        view.delegate = self
+        view.translatesAutoresizingMaskIntoConstraints = false
+        
+        return view
     }()
     
-    private lazy var titleTextField: UITextField = {
-        let textField = UITextField()
-       // textField.isHidden = true
-        textField.translatesAutoresizingMaskIntoConstraints = false
-        textField.backgroundColor = .white
-        textField.textColor = .black
-        textField.font = UIFont.systemFont(ofSize: 15.0)
-        textField.layer.borderWidth = 1.0
-        textField.layer.borderColor = UIColor.black.cgColor
-        textField.layer.cornerRadius = 12.0
-        let leftView = UIView(frame: CGRect(x: 0.0, y: 0.0, width: 20.0, height: 2.0))
-        textField.leftView = leftView
-        textField.leftViewMode = .always
-        textField.clipsToBounds = true
-        textField.placeholder = "Enter Titile"
-        textField.clearButtonMode = .whileEditing
-
-        return textField
-    }()
-    
-    private lazy var titleButton: UIButton = {
-        let button = UIButton()
-        button.backgroundColor = .blue
-        button.layer.cornerRadius = 4
-        button.setTitle("Change title", for: .normal)
-        button.setTitleColor(.white, for: .normal)
-        button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 24)
-        button.addTarget(self, action: #selector(titleButtonAction), for: .touchUpInside)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.layer.shadowOffset = CGSize(width: 4.0, height: 4.0)
-        button.layer.shadowRadius = 4.0
-        button.layer.shadowColor = UIColor.black.cgColor
-        button.layer.shadowOpacity = 0.7
-        button.layer.shouldRasterize = true
-     
-        return button
-    }()
-*/
+    private var heightConstraint: NSLayoutConstraint?
+  
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.view.addSubview(self.tableView)
-        self.setupView()
-        navigationItem.title = "Profile"
-        view.backgroundColor = .lightGray
-        navigationController?.navigationBar.prefersLargeTitles = false
-        navigationController?.navigationBar.isHidden = false
+        setupTableView()
+        tapGesturt()
+       
+        self.fetchArticles { [weak self] articles in
+            self?.dataSource = articles
+            self?.tableView.reloadData()
+        }
+      
+        self.tableView.tableHeaderView = tableHeaderView
+        setupProfileHeadView()
     }
     
-    private func setupNavigationBar() {
-           self.navigationItem.title = "Profile"
-       }
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.tabBarController?.tabBar.isHidden = false
+        self.navigationController?.navigationBar.isHidden = true
+    }
     
-    private func setupView() {
-        self.view.backgroundColor = .white
+    override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+        updateHeaderViewHeight(for: tableView.tableHeaderView)
+    }
+    
+    private func setupTableView() {
+        self.view.addSubview(self.tableView)
         
-        self.view.addSubview(self.profileHeaderView)
-        
-        let topConstraint = self.profileHeaderView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor)
-        let leadingConstraint = self.profileHeaderView.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor)
-        let trailingConstraint = self.profileHeaderView.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor)
-        let heightConstraint = self.profileHeaderView.heightAnchor.constraint(equalToConstant: 170)
-        
-        let tableViewTop = self.tableView.topAnchor.constraint(equalTo: self.profileHeaderView.bottomAnchor, constant: 20)
-        let tableViewLeft = self.tableView.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor)
-        let tableViewRight = self.tableView.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor)
-        let tableViewHeight = self.tableView.heightAnchor.constraint(equalToConstant: 130)
+        let topConstraint = self.tableView.topAnchor.constraint(equalTo: self.view.topAnchor)
+        let leadingConstraint = self.tableView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor)
+        let trailingConstraint = self.tableView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor)
+        let bottomConstraint = self.tableView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
         
         NSLayoutConstraint.activate([
-            topConstraint, leadingConstraint, trailingConstraint, heightConstraint, tableViewTop, tableViewLeft, tableViewRight, tableViewHeight
+            topConstraint, leadingConstraint, trailingConstraint, bottomConstraint
         ])
     }
     
-}
-
-/*    func setTitleStackView() {
-        self.view.addSubview(self.titleStackView)
-        self.titleStackView.addArrangedSubview(titleTextField)
-        self.titleStackView.addArrangedSubview(titleButton)
+    private func setupProfileHeadView() {
+        self.view.backgroundColor = .lightGray
         
-        let titleStackViewCenterY = self.titleStackView.centerYAnchor.constraint(equalTo: self.view.centerYAnchor)
-        let titleStackViewLeadingConstraint = self.titleStackView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16)
-        let titleStackViewTrailingConstraint = self.titleStackView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16)
-
+        let topConstraint = self.tableHeaderView.topAnchor.constraint(equalTo: tableView.topAnchor)
+        let leadingConstraint = self.tableHeaderView.leadingAnchor.constraint(equalTo: tableView.leadingAnchor)
+        let trailingConstraint = self.tableHeaderView.trailingAnchor.constraint(equalTo: tableView.trailingAnchor)
+        let widthConstraint = self.tableHeaderView.widthAnchor.constraint(equalTo: tableView.widthAnchor)
+        self.heightConstraint = self.tableHeaderView.heightAnchor.constraint(equalToConstant: 220)
+        let bottomConstraint = self.tableHeaderView.bottomAnchor.constraint(equalTo: tableView.bottomAnchor)
         
-        let titleTextFieldHeightAnchor = self.titleTextField.heightAnchor.constraint(equalToConstant: 40)
-        let titleButtonHeightAnchor = self.titleButton.heightAnchor.constraint(equalToConstant: 50)
-        NSLayoutConstraint.activate([titleStackViewCenterY, titleStackViewLeadingConstraint,
-                                     titleStackViewTrailingConstraint, titleTextFieldHeightAnchor,
-                                     titleButtonHeightAnchor
-                                    ].compactMap( {$0} ))
+        NSLayoutConstraint.activate([
+            topConstraint, leadingConstraint, trailingConstraint, bottomConstraint,
+            heightConstraint, widthConstraint
+        ].compactMap( {$0} ))
     }
     
-    @objc private func titleButtonAction() {
-        self.navigationItem.title = titleTextField.text!
-        titleTextField.text = nil
+    // MARK: Data coder
+    private func fetchArticles(completion: @escaping ([Articles.Article]) -> Void) {
+            if let path = Bundle.main.path(forResource: "jsonFile", ofType: "json") {
+                do {
+                    let data = try Data(contentsOf: URL(fileURLWithPath: path), options: .alwaysMapped)
+                    let jsonFile = try self.jsonDecoder.decode(Articles.self, from: data)
+                    print("json data: \(jsonFile)")
+                    completion(jsonFile.articles)
+                } catch let error {
+                    print("parse error: \(error.localizedDescription)")
+                }
+            } else {
+                fatalError("Invalid filename/path.")
+            }
+    }
+    func tapGesturt() {
+        let tapGesture = UITapGestureRecognizer(target: self.view, action: #selector(view.endEditing))
+        self.view.addGestureRecognizer(tapGesture)
+    }
+    
+    func updateHeaderViewHeight(for header: UIView?) {
+        guard let header = header else { return }
+        header.frame.size.height = header.systemLayoutSizeFitting(CGSize(width: view.bounds.width, height: CGFloat(heightConstraint!.constant))).height
     }
 }
-extension ProfileViewController: ProfileHeaderViewProtocol{
+
+// MARK: - UITableView Data Source
+extension ProfileViewController: UITableViewDataSource, UITableViewDelegate {
+    
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return 2
+    }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if section == 0 {
+            return 1
+        } else {
+            return self.dataSource.count
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        if indexPath.section == 0 {
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: "PhotoCell", for: indexPath) as? PhotosTableViewCell else {
+                let cell = tableView.dequeueReusableCell(withIdentifier: "DefaultCell", for: indexPath)
+                
+                return cell
+            }
+            cell.delegate = self
+            cell.layer.shouldRasterize = true
+            cell.layer.rasterizationScale = UIScreen.main.scale
+        
+            return cell
+        } else {
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: "PostCell", for: indexPath) as? PhotosListViewCell else {
+                let cell = tableView.dequeueReusableCell(withIdentifier: "DefaultCell", for: indexPath)
+                
+                return cell
+            }
+            let article = self.dataSource[indexPath.row]
+            let viewModel = PhotosListViewCell.ViewModel(author: article.title, description: article.description, image: article.image, likes: article.likes, views: article.views)
+            cell.setup(with: viewModel)
+            
+            return cell
+        }
+    }
+}
+
+extension ProfileViewController: ProfileHeaderViewProtocol {
+    
     func buttonAction(inputTextIsVisible: Bool, completion: @escaping () -> Void) {
         self.heightConstraint?.constant = inputTextIsVisible ? 250 : 220
 
+        self.tableView.beginUpdates()
+        self.tableView.reloadSections(IndexSet(0..<1), with: .automatic)
+        self.tableView.endUpdates()
+        
         UIView.animate(withDuration: 0.2, delay: 0.0) {
             self.view.layoutIfNeeded()
         } completion: { _ in
             completion()
         }
-    } */
-
-
-extension ProfileViewController: UITableViewDataSource, UITableViewDelegate {
-    
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 1
     }
+}
+
+extension ProfileViewController: PhotosTableViewCellProtocol {
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = self.tableView.dequeueReusableCell(withIdentifier: "PhotosTableViewCell", for: indexPath) as! PhotosTableViewCell
-        return cell
-    }
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    func delegateButtonAction(cell: PhotosTableViewCell) {
         let photosViewController = PhotosViewController()
-        navigationController?.pushViewController(photosViewController, animated: true)
+        self.navigationController?.pushViewController(photosViewController, animated: true)
     }
 }
