@@ -2,12 +2,12 @@
 //  ProfileViewController.swift
 //  navigation
 //
-//  Created by Max Egorov on 3/11/22.
+//  Created by Max Egorov on 2/11/22.
 //
 
 import UIKit
 
-final class ProfileViewController: UIViewController {
+final class ProfileViewControllerOLD: UIViewController {
     
     private var dataSource: [Articles.Article] = []
     
@@ -19,8 +19,8 @@ final class ProfileViewController: UIViewController {
         let tableView = UITableView()
         tableView.backgroundColor = .systemGray6
         tableView.translatesAutoresizingMaskIntoConstraints = false
-        tableView.dataSource = self
-        tableView.delegate = self
+    //    tableView.dataSource = self
+     //   tableView.delegate = self
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "DefaultCell")
         tableView.register(PhotosTableViewCell.self, forCellReuseIdentifier: "PhotoCell")
         tableView.register(PhotosListViewCell.self, forCellReuseIdentifier: "PostCell")
@@ -44,11 +44,11 @@ final class ProfileViewController: UIViewController {
         super.viewDidLoad()
         setupTableView()
         tapGesturt()
-        tabBarController?.tabBar.isHidden = false
-//        self.fetchArticles { [weak self] articles in
-//            self?.dataSource = articles
-//            self?.tableView.reloadData()
-//        }
+       
+        self.fetchArticles { [weak self] articles in
+            self?.dataSource = articles
+            self?.tableView.reloadData()
+        }
       
         self.tableView.tableHeaderView = tableHeaderView
         setupProfileHeadView()
@@ -56,7 +56,7 @@ final class ProfileViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        self.tabBarController?.tabBar.isHidden = true
+        self.tabBarController?.tabBar.isHidden = false
         self.navigationController?.navigationBar.isHidden = true
     }
     
@@ -80,6 +80,7 @@ final class ProfileViewController: UIViewController {
     
     private func setupProfileHeadView() {
         self.view.backgroundColor = .lightGray
+        
         let topConstraint = self.tableHeaderView.topAnchor.constraint(equalTo: tableView.topAnchor)
         let leadingConstraint = self.tableHeaderView.leadingAnchor.constraint(equalTo: tableView.leadingAnchor)
         let trailingConstraint = self.tableHeaderView.trailingAnchor.constraint(equalTo: tableView.trailingAnchor)
@@ -93,16 +94,7 @@ final class ProfileViewController: UIViewController {
         ].compactMap( {$0} ))
     }
     
-    func tapGesturt() {
-        let tapGesture = UITapGestureRecognizer(target: self.view, action: #selector(view.endEditing))
-        self.view.addGestureRecognizer(tapGesture)
-    }
-    
-    func updateHeaderViewHeight(for header: UIView?) {
-        guard let header = header else { return }
-        header.frame.size.height = header.systemLayoutSizeFitting(CGSize(width: view.bounds.width, height: CGFloat(heightConstraint!.constant))).height
-    }
-  
+    // MARK: Data coder
     private func fetchArticles(completion: @escaping ([Articles.Article]) -> Void) {
             if let path = Bundle.main.path(forResource: "jsonFile", ofType: "json") {
                 do {
@@ -117,9 +109,19 @@ final class ProfileViewController: UIViewController {
                 fatalError("Invalid filename/path.")
             }
     }
+    func tapGesturt() {
+        let tapGesture = UITapGestureRecognizer(target: self.view, action: #selector(view.endEditing))
+        self.view.addGestureRecognizer(tapGesture)
+    }
+    
+    func updateHeaderViewHeight(for header: UIView?) {
+        guard let header = header else { return }
+        header.frame.size.height = header.systemLayoutSizeFitting(CGSize(width: view.bounds.width, height: CGFloat(heightConstraint!.constant))).height
+    }
 }
 
-extension ProfileViewController: UITableViewDataSource, UITableViewDelegate {
+// MARK: - UITableView Data Source
+extension ProfileViewControllerOLD: UITableViewDataSource, UITableViewDelegate {
     
     func numberOfSections(in tableView: UITableView) -> Int {
         return 2
@@ -158,23 +160,6 @@ extension ProfileViewController: UITableViewDataSource, UITableViewDelegate {
             return cell
         }
     }
-}
-
-extension ProfileViewController: ProfileHeaderViewProtocol {
-    func buttonAction(inputTextIsVisible: Bool, completion: @escaping () -> Void) {
-        self.heightConstraint?.constant = inputTextIsVisible ? 250 : 220
-
-        self.tableView.beginUpdates()
-        self.tableView.reloadSections(IndexSet(0..<1), with: .automatic)
-        self.tableView.endUpdates()
-        
-        UIView.animate(withDuration: 0.2, delay: 0.0) {
-            self.view.layoutIfNeeded()
-        } completion: { _ in
-            completion()
-        }
-    }
-    
     func delegateAction(cell: ProfileHeaderView) {
      
         let animatedAvatarViewController = AnimatedAvatarViewController()
@@ -193,7 +178,25 @@ extension ProfileViewController: ProfileHeaderViewProtocol {
     }
 }
 
-extension ProfileViewController: PhotosTableViewCellProtocol {
+extension ProfileViewControllerOLD: ProfileHeaderViewProtocol {
+    
+    func buttonAction(inputTextIsVisible: Bool, completion: @escaping () -> Void) {
+        self.heightConstraint?.constant = inputTextIsVisible ? 250 : 220
+
+        self.tableView.beginUpdates()
+        self.tableView.reloadSections(IndexSet(0..<1), with: .automatic)
+        self.tableView.endUpdates()
+        
+        UIView.animate(withDuration: 0.2, delay: 0.0) {
+            self.view.layoutIfNeeded()
+        } completion: { _ in
+            completion()
+        }
+    }
+}
+
+extension ProfileViewControllerOLD: PhotosTableViewCellProtocol {
+    
     func delegateButtonAction(cell: PhotosTableViewCell) {
         let photosViewController = PhotosViewController()
         self.navigationController?.pushViewController(photosViewController, animated: true)

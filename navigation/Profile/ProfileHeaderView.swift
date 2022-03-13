@@ -9,19 +9,42 @@ import UIKit
 
 protocol ProfileHeaderViewProtocol: AnyObject {
     func buttonAction(inputTextIsVisible: Bool, completion: @escaping () -> Void)
+    func delegateAction(cell: ProfileHeaderView)
 }
 
 class ProfileHeaderView: UIView, UITextFieldDelegate, UIGestureRecognizerDelegate {
-    
+    var profileHeaderView : UIViewController?
     var statusText: String? = nil
   
      lazy var avatarImageView: UIImageView = {
-        let imageView = UIImageView(image: UIImage(named: "picon.jpg"))
+         let img = UIImage(named: "picon.jpg") as UIImage?
+         let imageView = UIImageView(image: img)
+         let button = UIButton(type: UIButton.ButtonType.custom)
+         button.setImage(img, for: .normal)
+         
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.layer.borderWidth = 3.0
         imageView.layer.borderColor = UIColor.white.cgColor
         imageView.layer.cornerRadius = 70.0
         imageView.clipsToBounds = true
+         //imageView.addTarget(self, action: #selector(self.didTapAvatar), for: .touchUpInside)
+         
+         
+         button.layer.cornerRadius = 10
+         button.setTitle("Log in", for: .normal)
+         let image = UIImage(named: "Color_Set")
+         button.setBackgroundImage(image, for: .normal)
+         if button.isSelected {
+             button.alpha = 0.8
+         } else if button.isHighlighted {
+             button.alpha = 0.8
+         } else {
+             button.alpha = 1.0
+         }
+         button.setTitleColor(.white, for: .normal)
+         button.addTarget(self, action: #selector(self.didTapAvatar), for: .touchUpInside)
+         button.translatesAutoresizingMaskIntoConstraints = false
+         button.clipsToBounds = true
 
         return imageView
     }()
@@ -103,6 +126,7 @@ class ProfileHeaderView: UIView, UITextFieldDelegate, UIGestureRecognizerDelegat
     }()
     
     private var buttonTopConstrain: NSLayoutConstraint?
+    private var tapGestureRecognizer = UITapGestureRecognizer()
     
     weak var delegate: ProfileHeaderViewProtocol?
     override init(frame: CGRect) {
@@ -124,6 +148,7 @@ class ProfileHeaderView: UIView, UITextFieldDelegate, UIGestureRecognizerDelegat
         self.labelStackView.addArrangedSubview(statusLabel)
         self.statusTextField.delegate = self
         setupConstraints()
+        self.setupTapGesture()
     }
   
     func setupConstraints() {
@@ -191,6 +216,20 @@ class ProfileHeaderView: UIView, UITextFieldDelegate, UIGestureRecognizerDelegat
     @objc func statusTextChanged(_ textField: UITextField) {
         let status: String = textField.text ?? ""
         print("Новый статус = \(status)")
+    }
+    private func setupTapGesture() {
+        self.tapGestureRecognizer.addTarget(self, action: #selector(self.handleTapGesture(_:)))
+        self.avatarImageView.addGestureRecognizer(self.tapGestureRecognizer)
+        self.avatarImageView.isUserInteractionEnabled = true
+    }
+    @objc func handleTapGesture(_ gestureRecognizer: UITapGestureRecognizer) {
+        guard self.tapGestureRecognizer === gestureRecognizer else { return }
+        
+        delegate?.delegateAction(cell: self)
+    }
+    @objc private func didTapAvatar(){
+        let gestureViewController = GestureViewController()
+        profileHeaderView?.navigationController?.pushViewController(gestureViewController, animated: true)
     }
 }
 
