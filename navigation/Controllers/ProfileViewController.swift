@@ -163,6 +163,9 @@ extension ProfileViewController: UITableViewDataSource, UITableViewDelegate {
 }
 
 extension ProfileViewController: ProfileHeaderViewProtocol {
+    func delegateAction(cell: ProfileHeaderView) {
+    }
+    
     
     func buttonAction(inputTextIsVisible: Bool, completion: @escaping () -> Void) {
         self.heightConstraint?.constant = inputTextIsVisible ? 250 : 220
