@@ -13,7 +13,6 @@ class TabBarController: UITabBarController {
         case feed
         case profile
         case articles
-        case animation
         
         var title: String {
             switch self {
@@ -23,8 +22,6 @@ class TabBarController: UITabBarController {
                 return "Profile"
             case .articles:
                 return "Articles"
-            case .animation:
-                return "Animation"
             }
         }
         
@@ -36,8 +33,6 @@ class TabBarController: UITabBarController {
                 return UIImage(systemName: "person.circle")
             case .articles:
                 return UIImage(systemName: "flame.circle")
-            case .animation:
-                return UIImage(systemName: "hand.tap")
             }
         }
     }
@@ -48,7 +43,7 @@ class TabBarController: UITabBarController {
     }
     
     private func setupTabBar() {
-        let items: [TabBarItem] = [.feed, /*.articles,*/ .animation,  .profile]
+        let items: [TabBarItem] = [.feed, /*.articles,*/ .profile]
         
         self.viewControllers = items.map({ tabBarIten in
             switch tabBarIten {
@@ -58,9 +53,8 @@ class TabBarController: UITabBarController {
                 return UINavigationController(rootViewController: ArticlesViewController())
             case .profile:
                 //return UINavigationController(rootViewController: ProfileViewController())
+
                 return UINavigationController(rootViewController: LogInViewController())
-            case .animation:
-                return UINavigationController(rootViewController: GestureViewController())
             }
         })
         self.viewControllers?.enumerated().forEach({ (index, vc) in
