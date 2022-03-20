@@ -56,8 +56,9 @@ final class ProfileViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        self.tabBarController?.tabBar.isHidden = true
-        self.navigationController?.navigationBar.isHidden = true
+  //      self.tabBarController?.tabBar.isHidden = true
+        self.tabBarController?.tabBar.isHidden = false
+       // self.navigationController?.navigationBar.isHidden = true
     }
     
     override func viewWillLayoutSubviews() {
