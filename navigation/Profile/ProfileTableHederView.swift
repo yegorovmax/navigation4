@@ -1,18 +1,15 @@
 //
-//  ProfileHeaderView.swift
+//  ProfileTableHederView.swift
 //  navigation
 //
-//  Created by Max Egorov on 2/16/22.
+//  Created by Max Egorov on 3/26/22.
 //
 
 import UIKit
 
-protocol ProfileHeaderViewProtocol_old: AnyObject {
-    func buttonAction(inputTextIsVisible: Bool, completion: @escaping () -> Void)
-}
 
-class ProfileHeaderView: UIView, UITextFieldDelegate {
-
+class ProfileTableHederView: UITableViewHeaderFooterView, UITextFieldDelegate, UIGestureRecognizerDelegate {
+    
     var statusText: String? = nil
   
     private lazy var avatarImageView: UIImageView = {
@@ -107,13 +104,11 @@ class ProfileHeaderView: UIView, UITextFieldDelegate {
         return button
     }()
     
-    
-    
     private var buttonTopConstrain: NSLayoutConstraint?
     weak var delegate: ProfileHeaderViewProtocol?
     
-    override init(frame: CGRect) {
-        super.init(frame: frame)
+    override init (reuseIdentifier: String?) {
+        super.init(reuseIdentifier: reuseIdentifier)
         createSubviews()
     }
     

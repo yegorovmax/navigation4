@@ -7,8 +7,26 @@
 
 import UIKit
 
+protocol ProfileHeaderViewProtocol: AnyObject {
+    func buttonAction(inputTextIsVisible: Bool, completion: @escaping () -> Void)
+}
+
+
+
 class ProfileViewController: UIViewController {
     
+    
+    struct ViewModel: ViewModelProtocol {
+        var button: String
+        var textfield: String
+    }
+    
+    private var dataSource: [News.Article] = []
+    
+    private lazy var jsonDecoder: JSONDecoder = {
+        return JSONDecoder()
+    }()
+
     private lazy var profileHeaderView: ProfileHeaderView = {
         let view = ProfileHeaderView(frame: .zero) 
         view.delegate = self
@@ -67,14 +85,48 @@ class ProfileViewController: UIViewController {
         return button
     }()
 
+    private lazy var tableView: UITableView = {
+        let tableView = UITableView()
+        tableView.backgroundColor = .systemGray6
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.dataSource = self
+        tableView.delegate = self
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "DefaultCell")
+        tableView.register(PostTableViewCell.self, forCellReuseIdentifier: "PostCell")
+        tableView.register(ProfileTableHederView.self, forHeaderFooterViewReuseIdentifier: "TableHeder")
+        tableView.rowHeight = UITableView.automaticDimension
+        tableView.estimatedRowHeight = 44
+        
+        return tableView
+    }()
+
+    
+    private var isExpanded: Bool = true
+    private var height = 236
+    
     override func viewDidLoad() {
-        let tap = UITapGestureRecognizer(target: view, action: #selector(UIView.endEditing))
-        view.addGestureRecognizer(tap)
         super.viewDidLoad()
-        setupNavigationBar()
-        self.view.addSubview(self.profileHeaderView)
-        setupView()
-        setTitleStackView()
+        setupTableView()
+        tapGesturt()
+    }
+    
+    func tapGesturt() {
+        let tapGesture = UITapGestureRecognizer(target: self.view, action: #selector(view.endEditing))
+        self.view.addGestureRecognizer(tapGesture)
+    }
+
+    
+    private func setupTableView() {
+        self.view.addSubview(self.tableView)
+        
+        let topConstraint = self.tableView.topAnchor.constraint(equalTo: self.view.topAnchor)
+        let leadingConstraint = self.tableView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor)
+        let trailingConstraint = self.tableView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor)
+        let bottomConstraint = self.tableView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
+        
+        NSLayoutConstraint.activate([
+            topConstraint, leadingConstraint, trailingConstraint, bottomConstraint
+        ])
     }
     
     private func setupNavigationBar() {
@@ -122,10 +174,50 @@ class ProfileViewController: UIViewController {
         titleTextField.text = nil
     }
 }
-extension ProfileViewController: ProfileHeaderViewProtocol {
-    func buttonAction(inputTextIsVisible: Bool, completion: @escaping () -> Void) {
-        self.heightConstraint?.constant = inputTextIsVisible ? 250 : 220
+extension ProfileViewController: UITableViewDataSource, UITableViewDelegate {
+    
+    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        let view = tableView.dequeueReusableHeaderFooterView(withIdentifier: "TableHeder") as! ProfileTableHederView
+        view.delegate = self
+        
+        return view
+    }
+    
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        isExpanded ? 236 : 266 // I-й способ
+        // CGFloat(height) // II-й способ
+        
+    }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        
+        return self.dataSource.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "PostCell", for: indexPath) as? PostTableViewCell else {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "DefaultCell", for: indexPath)
+            
+            return cell
+        }
+        
+        let article = self.dataSource[indexPath.row]
+//        let viewModel = PostTableViewCell.ViewModel(
+//        //
+//            )
+        return cell
+    }
+}
 
+// MARK: EXTENSIONS
+extension ProfileViewController: ProfileHeaderViewProtocol {
+    
+    func buttonAction(inputTextIsVisible: Bool, completion: @escaping () -> Void) {
+        self.tableView.beginUpdates()
+        self.isExpanded = !inputTextIsVisible // I-й способ
+        // self.height = inputTextIsVisible ? 266 : 236 // II-й способ
+        self.tableView.endUpdates()
         UIView.animate(withDuration: 0.2, delay: 0.0) {
             self.view.layoutIfNeeded()
         } completion: { _ in
