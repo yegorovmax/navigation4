@@ -66,8 +66,6 @@ class PhotosViewController: UIViewController {
     }
 }
 
-// MARK: - Extension UICollectionView Data Source
-
 extension PhotosViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {

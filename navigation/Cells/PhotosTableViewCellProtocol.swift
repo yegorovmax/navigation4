@@ -1,8 +1,8 @@
 //
-//  PhotosTableViewCell.swift
+//  PhotosTableViewCellProtocol.swift
 //  navigation
 //
-//  Created by Max Egorov on 3/4/22.
+//  Created by Max Egorov on 3/31/22.
 //
 
 import UIKit
@@ -12,7 +12,7 @@ protocol PhotosTableViewCellProtocol: AnyObject {
 }
 
 class PhotosTableViewCell: UITableViewCell {
-    
+        
     private enum Constant {
         static let itemCount: CGFloat = 4
     }
@@ -50,11 +50,11 @@ class PhotosTableViewCell: UITableViewCell {
     
     private lazy var transitionButton: UIButton = {
         let button = UIButton()
+        //let image = UIImage(named: "arrow")
+        // button.setBackgroundImage(image, for: .normal)
         button.setImage(UIImage(systemName: "arrow.right"), for: .normal)
-        button.tintColor = .black
-        button.setTitleColor(.black, for: .normal)
+        self.tintColor  = .black
         button.addTarget(self, action: #selector(buttonAction), for: .touchUpInside)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 24)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setContentCompressionResistancePriority(UILayoutPriority(250), for: .horizontal)
         
@@ -79,7 +79,7 @@ class PhotosTableViewCell: UITableViewCell {
         
         return collectionView
     }()
-    
+        
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupView()
@@ -88,7 +88,7 @@ class PhotosTableViewCell: UITableViewCell {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+        
     private func setupView() {
         self.backgroundColor = .systemGray6
         self.contentView.addSubview(self.backView)
@@ -100,21 +100,18 @@ class PhotosTableViewCell: UITableViewCell {
     }
     
     private func setupConstraints() {
-        let topConstraint = self.backView.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 16)
+        let topConstraint = self.backView.topAnchor.constraint(equalTo: self.contentView.topAnchor)
         let leadingConstraint = self.backView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor)
         let trailingConstraint = self.backView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor)
-        let bottomConstraint = self.backView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor, constant: -16)
-        
+        let bottomConstraint = self.backView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor)
         let stackViewTopConstraint = self.stackView.topAnchor.constraint(equalTo: self.backView.topAnchor, constant: 12)
         let stackViewLeadingConstraint = self.stackView.leadingAnchor.constraint(equalTo: self.backView.leadingAnchor, constant: 12)
         let stackViewTrailingConstraint = self.stackView.trailingAnchor.constraint(equalTo: self.backView.trailingAnchor, constant: -12)
-        
         let transitionButtonHeight = self.transitionButton.heightAnchor.constraint(equalTo: self.stackView.heightAnchor, multiplier: 1)
-        
         let photoCollectionViewTopConstraint = self.photoCollectionView.topAnchor.constraint(equalTo: self.stackView.bottomAnchor)
         let photoCollectionViewLeadingConstraint = self.photoCollectionView.leadingAnchor.constraint(equalTo: self.backView.leadingAnchor, constant: 12)
         let photoCollectionViewTrailingConstraint = self.photoCollectionView.trailingAnchor.constraint(equalTo: self.backView.trailingAnchor, constant: -12)
-        let photoCollectionViewConstraint = self.photoCollectionView.bottomAnchor.constraint(equalTo: self.backView.bottomAnchor, constant: -12)
+        let photoCollectionViewConstraint = self.photoCollectionView.bottomAnchor.constraint(equalTo: self.backView.bottomAnchor)
         let photoCollectionViewHeight = self.photoCollectionView.heightAnchor.constraint(equalTo: self.contentView.widthAnchor, multiplier: 0.25)
         
         NSLayoutConstraint.activate([
@@ -126,12 +123,12 @@ class PhotosTableViewCell: UITableViewCell {
         ])
     }
     
-    @objc private func buttonAction() {
+    @objc private func buttonAction() { 
         delegate?.delegateButtonAction(cell: self)
     }
     
     private func itemSize(for width: CGFloat, with spacing: CGFloat) -> CGSize {
-        let needWidth = width - 2 * spacing
+        let needWidth = width - 4 * spacing
         let itemWidth = floor(needWidth / Constant.itemCount)
         
         return CGSize(width: itemWidth, height: itemWidth)
@@ -148,11 +145,9 @@ extension PhotosTableViewCell: UICollectionViewDelegate, UICollectionViewDataSou
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PhotosCollection", for: indexPath) as! PhotosCollectionViewCell
         
-        DispatchQueue.main.async {
-            let img = myImage[indexPath.row]
-            let viewModel = PhotosCollectionViewCell.ViewModel(image: img.image)
+            let myImg = myImage[indexPath.row]
+            let viewModel = PhotosCollectionViewCell.ViewModel(image: myImg.image)
             cell.setup(with: viewModel)
-        }
         
         return cell
     }
@@ -166,4 +161,5 @@ extension PhotosTableViewCell : UICollectionViewDelegateFlowLayout {
         return self.itemSize(for: collectionView.frame.width, with: spacing ?? 0)
     }
 }
+
 

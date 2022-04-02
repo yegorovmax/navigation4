@@ -1,21 +1,30 @@
 //
-//  PhotosListViewCell.swift
+//  FullPostView.swift
 //  navigation
 //
-//  Created by Max Egorov on 2/27/22.
+//  Created by Max Egorov on 3/31/22.
 //
 
 import UIKit
 
-class PhotosListViewCell: UITableViewCell {
-    
+class FullPostView: UIView {
+        
     struct ViewModel: ViewModelProtocol {
         var author: String
         var description: String
         var image: String
-        var likes: String
-        var views: String
+        var likes: Int
+        var views: Int
     }
+    
+    private lazy var mainView: UIView = {
+        let view = UIView()
+        view.clipsToBounds = true
+        view.backgroundColor = .black.withAlphaComponent(0.8)
+        view.translatesAutoresizingMaskIntoConstraints = false
+        
+        return view
+    }()
     
     private lazy var backView: UIView = {
         let view = UIView()
@@ -26,10 +35,10 @@ class PhotosListViewCell: UITableViewCell {
         return view
     }()
     
-    private lazy var authorLabel: UILabel = {
+    private lazy var authorLabel: UILabel = { 
         let label = UILabel()
         label.backgroundColor = .clear
-        label.numberOfLines = 2
+        label.numberOfLines = 0
         label.font = UIFont.boldSystemFont(ofSize: 20)
         label.preferredMaxLayoutWidth = self.frame.size.width
         label.textColor = .black
@@ -44,7 +53,7 @@ class PhotosListViewCell: UITableViewCell {
         imageView.contentMode = .scaleAspectFill
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.backgroundColor = .black
-//        imageView.contentMode = .scaleAspectFit
+        imageView.setContentCompressionResistancePriority(UILayoutPriority(250), for: .vertical)
         
         return imageView
     }()
@@ -67,42 +76,81 @@ class PhotosListViewCell: UITableViewCell {
         let stackView = UIStackView()
         stackView.axis = .horizontal
         stackView.distribution = .fill
-        stackView.setContentCompressionResistancePriority(UILayoutPriority(250), for: .vertical)
+        stackView.setContentCompressionResistancePriority(UILayoutPriority(1000), for: .vertical)
         stackView.translatesAutoresizingMaskIntoConstraints = false
         
         return stackView
     }()
     
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: reuseIdentifier)
+    private lazy var likeTitle: UILabel = {
+        let label = UILabel()
+        label.text = "Likes: "
+        label.backgroundColor = .clear
+        label.font = UIFont.systemFont(ofSize: 16)
+        label.preferredMaxLayoutWidth = self.frame.size.width
+        label.textColor = .black
+        label.setContentHuggingPriority(UILayoutPriority(1), for: .horizontal)
+        label.setContentCompressionResistancePriority(UILayoutPriority(500), for: .horizontal)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        
+        return label
+    }()
+    
+    private lazy var viewTitle: UILabel = {
+        let label = UILabel()
+        label.text  = "Views: "
+        label.backgroundColor = .clear
+        label.font = UIFont.systemFont(ofSize: 16)
+        label.preferredMaxLayoutWidth = self.frame.size.width
+        label.textColor = .black
+        label.setContentCompressionResistancePriority(UILayoutPriority(500), for: .horizontal)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        
+        return label
+    }()
+    
+    private lazy var transitionButton: UIButton = {
+        let button = UIButton()
+        let image = UIImage(named: "cancel")
+        button.setBackgroundImage(image, for: .normal)
+        button.addTarget(self, action: #selector(clickButton), for: .touchUpInside)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        
+        return button
+    }()
+        
+    override init(frame: CGRect) {
+        super.init(frame: frame)
         self.setupView()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
-    override func prepareForReuse() {
-        super.prepareForReuse()
-        self.authorLabel.text = nil
-        self.postImageView.image = nil
-        self.descriptionLabel.text = nil
-    }
-    
+        
     private func setupView() {
-        self.contentView.addSubview(self.backView)
+        self.addSubview(self.mainView)
+        self.addSubview(self.transitionButton)
+        self.mainView.addSubview(self.backView)
         self.backView.addSubview(self.authorLabel)
         self.backView.addSubview(self.postImageView)
         self.backView.addSubview(self.descriptionLabel)
         self.backView.addSubview(self.likeStackView)
+        self.likeStackView.addArrangedSubview(self.likeTitle)
+        self.likeStackView.addArrangedSubview(self.viewTitle)
         setupConstraints()
     }
     
     private func setupConstraints() {
-        let topConstraint = self.backView.topAnchor.constraint(equalTo: self.contentView.topAnchor)
-        let leadingConstraint = self.backView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor)
-        let trailingConstraint = self.backView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor)
-        let bottomConstraint = self.backView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor)
+        let topConstraint = self.mainView.topAnchor.constraint(equalTo: self.topAnchor)
+        let leadingConstraint = self.mainView.leadingAnchor.constraint(equalTo: self.leadingAnchor)
+        let trailingConstraint = self.mainView.trailingAnchor.constraint(equalTo: self.trailingAnchor)
+        let bottomConstraint = self.mainView.bottomAnchor.constraint(equalTo: self.bottomAnchor)
+        
+        let topConstraintBackView = self.backView.centerXAnchor.constraint(equalTo: self.mainView.centerXAnchor)
+        let leadingConstraintBackView = self.backView.leadingAnchor.constraint(equalTo: self.mainView.leadingAnchor)
+        let trailingConstraintBackView = self.backView.trailingAnchor.constraint(equalTo: self.mainView.trailingAnchor)
+        let bottomConstraintBackView = self.backView.centerYAnchor.constraint(equalTo: self.mainView.centerYAnchor)
         
         let topConstraintAuthorLabel = self.authorLabel.topAnchor.constraint(equalTo: self.backView.topAnchor, constant: 16)
         let leadingConstraintAuthorLabel = self.authorLabel.leadingAnchor.constraint(equalTo: self.backView.leadingAnchor, constant: 16)
@@ -112,7 +160,7 @@ class PhotosListViewCell: UITableViewCell {
         let leadingConstraintPostImageView = self.postImageView.leadingAnchor.constraint(equalTo: self.backView.leadingAnchor)
         let trailingConstraintPostImageView = self.postImageView.trailingAnchor.constraint(equalTo: self.backView.trailingAnchor)
         let widthPostImageView = self.postImageView.heightAnchor.constraint(equalTo: self.backView.widthAnchor, multiplier: 1.0)
-        
+       
         let topConstraintDescriptionLabel = self.descriptionLabel.topAnchor.constraint(equalTo: self.postImageView.bottomAnchor, constant: 16)
         let leadingConstraintDescriptionLabell = self.descriptionLabel.leadingAnchor.constraint(equalTo: self.backView.leadingAnchor, constant: 16)
         let trailingConstraintDescriptionLabel = self.descriptionLabel.trailingAnchor.constraint(equalTo: self.backView.trailingAnchor, constant: -16)
@@ -122,6 +170,11 @@ class PhotosListViewCell: UITableViewCell {
         let trailingConstraintLikeStackView = self.likeStackView.trailingAnchor.constraint(equalTo: self.backView.trailingAnchor, constant: -16)
         let bottomConstraintLikeStackView = self.likeStackView.bottomAnchor.constraint(equalTo: self.backView.bottomAnchor, constant: -16)
         
+        let buttonTopConstrain = self.transitionButton.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 16)
+        let buttonTrailingConstraint = self.transitionButton.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -16)
+        let buttonHeightConstraint = self.transitionButton.heightAnchor.constraint(equalToConstant: 40)
+        let buttonWidthConstraint = self.transitionButton.widthAnchor.constraint(equalToConstant: 40)
+        
         NSLayoutConstraint.activate([
             topConstraint, leadingConstraint, bottomConstraint, trailingConstraint,
             topConstraintAuthorLabel, topConstraintPostImageView,widthPostImageView,
@@ -130,18 +183,29 @@ class PhotosListViewCell: UITableViewCell {
             trailingConstraintDescriptionLabel, topConstraintLikeStackView,
             leadingConstraintLikeStackView, trailingConstraintLikeStackView,
             bottomConstraintLikeStackView, leadingConstraintPostImageView,
-            trailingConstraintPostImageView
+            trailingConstraintPostImageView,
+            topConstraintBackView, bottomConstraintBackView,
+            leadingConstraintBackView, trailingConstraintBackView,
+            buttonTopConstrain, buttonTrailingConstraint,
+            buttonHeightConstraint, buttonWidthConstraint
         ])
+    }
+    
+    @objc private func clickButton() { 
+        removeFromSuperview()
     }
 }
 
-extension PhotosListViewCell: Setupable {
+extension FullPostView: Setupable {
     
     func setup(with viewModel: ViewModelProtocol) {
         guard let viewModel = viewModel as? ViewModel else { return }
-
+        
         self.authorLabel.text = viewModel.author
         self.postImageView.image = UIImage(named: viewModel.image)
         self.descriptionLabel.text = viewModel.description
+        self.likeTitle.text = "Likes: " + String(viewModel.likes)
+        self.viewTitle.text = "Views: " + String(viewModel.views)
     }
 }
+

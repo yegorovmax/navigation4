@@ -12,7 +12,6 @@ class TabBarController: UITabBarController {
     private enum TabBarItem {
         case feed
         case profile
-        case articles
         
         var title: String {
             switch self {
@@ -20,8 +19,8 @@ class TabBarController: UITabBarController {
                 return "Home"
             case .profile:
                 return "Profile"
-            case .articles:
-                return "Articles"
+           // case .articles:
+           //     return "Articles"
             }
         }
         
@@ -31,8 +30,8 @@ class TabBarController: UITabBarController {
                 return UIImage(systemName: "house")
             case .profile:
                 return UIImage(systemName: "person.circle")
-            case .articles:
-                return UIImage(systemName: "flame.circle")
+          //  case .articles:
+          //      return UIImage(systemName: "flame.circle")
             }
         }
     }
@@ -49,12 +48,10 @@ class TabBarController: UITabBarController {
             switch tabBarIten {
             case .feed:
                 return UINavigationController(rootViewController: FeedViewController())
-            case .articles:
-                return UINavigationController(rootViewController: ArticlesViewController())
             case .profile:
-                //return UINavigationController(rootViewController: ProfileViewController())
+                return UINavigationController(rootViewController: ProfileViewController())
 
-                return UINavigationController(rootViewController: LogInViewController())
+             //   return UINavigationController(rootViewController: LogInViewController())
             }
         })
         self.viewControllers?.enumerated().forEach({ (index, vc) in

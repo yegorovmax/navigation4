@@ -2,7 +2,7 @@
 //  PhotosCollectionViewCell.swift
 //  navigation
 //
-//  Created by Max Egorov on 3/4/22.
+//  Created by Max Egorov on 3/31/22.
 //
 
 import UIKit
@@ -10,7 +10,7 @@ import UIKit
 class PhotosCollectionViewCell: UICollectionViewCell {
     
     struct ViewModel: ViewModelProtocol {
-        var image: String 
+        var image: String
     }
     
     let photoView: UIImageView = {
@@ -22,7 +22,7 @@ class PhotosCollectionViewCell: UICollectionViewCell {
         imageView.contentMode = .scaleAspectFill
         return imageView
     }()
-    
+        
     override init(frame: CGRect) {
         super .init(frame: frame)
         setupPhotoView()
@@ -31,7 +31,7 @@ class PhotosCollectionViewCell: UICollectionViewCell {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+        
     private func setupPhotoView() {
         self.addSubview(photoView)
         setupConstraints()
@@ -55,7 +55,7 @@ class PhotosCollectionViewCell: UICollectionViewCell {
 }
 
 extension PhotosCollectionViewCell: Setupable {
-    
+
     func setup(with viewModel: ViewModelProtocol) {
         guard let viewModel = viewModel as? ViewModel else { return }
         self.photoView.image = UIImage(named: viewModel.image)
