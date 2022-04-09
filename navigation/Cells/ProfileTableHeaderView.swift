@@ -87,7 +87,7 @@ class ProfileTableHeaderView: UITableViewHeaderFooterView {
     
     private lazy var setStatusButton: UIButton = {
         let button = UIButton()
-        button.setTitle("Show status", for: .normal)
+        button.setTitle("Update status", for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -176,7 +176,7 @@ class ProfileTableHeaderView: UITableViewHeaderFooterView {
             }
             statusText = statusTextField.text!
             statusLabel.text = "\(statusText ?? "")"
-            setStatusButton.setTitle("Show status", for: .normal)
+            setStatusButton.setTitle("Update status", for: .normal)
             self.statusTextField.removeFromSuperview()
             NSLayoutConstraint.deactivate([
                 topConstrain, leadingConstrain, trailingConstrain, textHeight

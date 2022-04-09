@@ -175,7 +175,7 @@ class ProfileHeaderView: UIView, UITextFieldDelegate, UIGestureRecognizerDelegat
         } else {
             statusText = statusTextField.text!
             statusLabel.text = "\(statusText ?? "")"
-            setStatusButton.setTitle("Show status", for: .normal)
+            setStatusButton.setTitle("Update status", for: .normal)
             
             self.statusTextField.removeFromSuperview()
             NSLayoutConstraint.deactivate([

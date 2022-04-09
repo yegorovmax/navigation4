@@ -14,6 +14,7 @@
 		0F4F5CC027B633F600497FA4 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F4F5CBF27B633F600497FA4 /* SceneDelegate.swift */; };
 		0F4F5CC727B633F700497FA4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0F4F5CC627B633F700497FA4 /* Assets.xcassets */; };
 		0F4F5CCA27B633F700497FA4 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0F4F5CC827B633F700497FA4 /* LaunchScreen.storyboard */; };
+		0F8BABAE2801568E00E72AC3 /* AnimatedPhotoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F8BABAD2801568E00E72AC3 /* AnimatedPhotoViewController.swift */; };
 		0FA693FA27B78D3000713471 /* ProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FA693F927B78D3000713471 /* ProfileViewController.swift */; };
 		0FA693FC27B78D5800713471 /* FeedViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FA693FB27B78D5800713471 /* FeedViewController.swift */; };
 		0FA693FE27B78DF100713471 /* Post.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FA693FD27B78DF100713471 /* Post.swift */; };
@@ -47,6 +48,7 @@
 		0F4F5CC627B633F700497FA4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		0F4F5CC927B633F700497FA4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		0F4F5CCB27B633F700497FA4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		0F8BABAD2801568E00E72AC3 /* AnimatedPhotoViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimatedPhotoViewController.swift; sourceTree = "<group>"; };
 		0FA693F927B78D3000713471 /* ProfileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewController.swift; sourceTree = "<group>"; };
 		0FA693FB27B78D5800713471 /* FeedViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedViewController.swift; sourceTree = "<group>"; };
 		0FA693FD27B78DF100713471 /* Post.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Post.swift; sourceTree = "<group>"; };
@@ -146,6 +148,7 @@
 				0F4953FD27BC5FF80092AB22 /* TabBarController.swift */,
 				0FFAA4F827CDAEEE00F20264 /* DelFAstViewController.swift */,
 				0FB38AD627F697310096488B /* AnimatedAvatarViewController.swift */,
+				0F8BABAD2801568E00E72AC3 /* AnimatedPhotoViewController.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -276,6 +279,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				0FFAA4F727CDABCD00F20264 /* Articles.swift in Sources */,
+				0F8BABAE2801568E00E72AC3 /* AnimatedPhotoViewController.swift in Sources */,
 				0FA6940027B78E2100713471 /* PostViewController.swift in Sources */,
 				0FB38AD527F6965D0096488B /* PhotosCollectionViewCell.swift in Sources */,
 				0FFAA4F927CDAEEE00F20264 /* DelFAstViewController.swift in Sources */,
