@@ -9,13 +9,34 @@ import UIKit
 
 protocol ProfileTableHeaderViewProtocol: AnyObject {
     func buttonAction(inputTextIsVisible: Bool, completion: @escaping () -> Void)
-    
+    func buttonAction2()
+
     func delegateActionAnimatedAvatar(cell: ProfileTableHeaderView)
 }
 
 class ProfileTableHeaderView: UITableViewHeaderFooterView {
-  
+    private let defaults = UserDefaults.standard
+    private var buttonTopConstraint: NSLayoutConstraint?
+    private var tapRemoveKeyBoard = UITapGestureRecognizer()
     var statusText: String?
+    
+    private lazy var mainStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        stackView.axis = .horizontal
+        stackView.spacing = 16
+        
+        return stackView
+    }()
+    
+    private lazy var labelsStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.distribution = .fillEqually
+        stackView.spacing = 20
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        return stackView
+    }()
     
     lazy var avatarImageView: UIImageView = {
         let imageView = UIImageView(image: UIImage(named: "picon.jpg"))
@@ -37,6 +58,16 @@ class ProfileTableHeaderView: UITableViewHeaderFooterView {
         
         return stackView
     }()
+    
+    private lazy var titleStackView: UIStackView = {
+            let stackView = UIStackView()
+            stackView.translatesAutoresizingMaskIntoConstraints = false
+            stackView.axis = .vertical
+            stackView.distribution = .fill
+            stackView.spacing = 10
+
+            return stackView
+        }()
     
     private lazy var firstStackView: UIStackView = {
         let stackView = UIStackView()
@@ -64,9 +95,38 @@ class ProfileTableHeaderView: UITableViewHeaderFooterView {
         return label
     }()
     
+    private func draw() {
+        self.addSubview(self.setStatusButton)
+        self.addSubview(labelsStackView)
+        self.addSubview(avatarImageView)
+        
+        self.labelsStackView.addArrangedSubview(self.fullNameLabel)
+        self.labelsStackView.addArrangedSubview(self.statusTextField)
+        
+        let userPhotoTop = avatarImageView.topAnchor.constraint(equalTo: self.topAnchor, constant: 16)
+        let userPhotoLeft = avatarImageView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 16)
+        let userPhotoWidth = avatarImageView.widthAnchor.constraint(equalToConstant: 120)
+        let userPhotoHeight = avatarImageView.heightAnchor.constraint(equalToConstant: 120)
+        
+        let labelsStackViewTop = labelsStackView.topAnchor.constraint(equalTo: self.topAnchor, constant: 27)
+        let labelsStackViewLeft = labelsStackView.leadingAnchor.constraint(equalTo: avatarImageView.trailingAnchor, constant: 16)
+
+        self.buttonTopConstraint = self.setStatusButton.topAnchor.constraint(equalTo: self.avatarImageView.bottomAnchor, constant: 16)
+        self.buttonTopConstraint?.priority = UILayoutPriority(rawValue: 999)
+        let leadingButtonConstraint = self.setStatusButton.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 16)
+        let trailingButtonConstraint = self.setStatusButton.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -16)
+        let heightButtonConstraint = self.setStatusButton.heightAnchor.constraint(equalToConstant: 50)
+        
+        NSLayoutConstraint.activate([
+            userPhotoTop, userPhotoLeft, userPhotoWidth, userPhotoHeight,
+            labelsStackViewTop, labelsStackViewLeft,
+            self.buttonTopConstraint, leadingButtonConstraint, trailingButtonConstraint, heightButtonConstraint
+        ].compactMap({ $0 }))
+    }
+    
     private lazy var statusTextField: UITextField = { 
         let textField = UITextField()
-        textField.isHidden = true
+        textField.isHidden = false
         textField.translatesAutoresizingMaskIntoConstraints = false
         textField.backgroundColor = .white
         textField.textColor = .black
@@ -85,6 +145,26 @@ class ProfileTableHeaderView: UITableViewHeaderFooterView {
         return textField
     }()
     
+    private lazy var statusTextField2: UITextField = {
+        let textField = UITextField()
+        // textField.isHidden = true
+        textField.translatesAutoresizingMaskIntoConstraints = false
+        textField.backgroundColor = .white
+        textField.textColor = .black
+        textField.font = UIFont.systemFont(ofSize: 15.0)
+        textField.layer.borderWidth = 1.0
+        textField.layer.borderColor = UIColor.black.cgColor
+        textField.layer.cornerRadius = 12.0
+        let leftView = UIView(frame: CGRect(x: 0.0, y: 0.0, width: 20.0, height: 2.0))
+        textField.leftView = leftView
+        textField.leftViewMode = .always
+        textField.clipsToBounds = true
+        textField.placeholder = "Enter Status"
+        textField.clearButtonMode = .whileEditing
+        
+        return textField
+        }()
+    
     private lazy var setStatusButton: UIButton = {
         let button = UIButton()
         button.setTitle("Update status", for: .normal)
@@ -93,7 +173,8 @@ class ProfileTableHeaderView: UITableViewHeaderFooterView {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.backgroundColor = .blue
         button.layer.cornerRadius = 4
-        button.addTarget(self, action: #selector(buttonAction),
+        //button.addTarget(self, action: #selector(buttonAction), for: .touchUpInside)
+        button.addTarget(self, action: #selector(buttonAction2),
                          for: .touchUpInside)
         button.layer.shadowOffset = CGSize(width: 4.0, height: 4.0)
         button.layer.shadowRadius = 4.0
@@ -113,6 +194,7 @@ class ProfileTableHeaderView: UITableViewHeaderFooterView {
     
     override init(reuseIdentifier: String?) {
         super.init(reuseIdentifier: reuseIdentifier)
+       // self.draw()
         self.createSubviews()
     }
     
@@ -121,16 +203,51 @@ class ProfileTableHeaderView: UITableViewHeaderFooterView {
     }
     
     func createSubviews() {
-        self.addSubview(firstStackView)
-        self.addSubview(statusTextField)
-        self.addSubview(setStatusButton)
-        self.firstStackView.addArrangedSubview(avatarImageView)
-        self.firstStackView.addArrangedSubview(labelStackView)
-        self.labelStackView.addArrangedSubview(fullNameLabel)
-        self.labelStackView.addArrangedSubview(statusLabel)
-        self.setupConstraints()
+//        self.addSubview(firstStackView)
+//        self.addSubview(statusTextField)
+//        self.addSubview(setStatusButton)
+//        self.firstStackView.addArrangedSubview(avatarImageView)
+//        self.firstStackView.addArrangedSubview(labelStackView)
+//        self.labelStackView.addArrangedSubview(fullNameLabel)
+//        self.labelStackView.addArrangedSubview(statusLabel)
+//        self.setupConstraints()
+//        self.setupTapGesture()
+      //  buttonAction()
+        
+        
+        self.addSubview(self.mainStackView)
+        self.mainStackView.addArrangedSubview(self.avatarImageView)
+        self.mainStackView.addArrangedSubview(self.labelStackView)
+        self.labelStackView.addArrangedSubview(self.fullNameLabel)
+        self.labelStackView.addArrangedSubview(self.statusLabel)
+        self.addSubview(self.statusTextField)
+        self.addSubview(self.setStatusButton)
+        self.setupConstraints2()
         self.setupTapGesture()
     }
+    
+    func setupConstraints2() {
+        NSLayoutConstraint.activate([
+            self.mainStackView.topAnchor.constraint(equalTo: self.topAnchor),
+            self.mainStackView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 16),
+            self.mainStackView.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -16),
+            
+            self.avatarImageView.widthAnchor.constraint(equalToConstant: 138),
+            self.avatarImageView.heightAnchor.constraint(equalToConstant: 138),
+            
+            self.statusTextField.topAnchor.constraint(equalTo: self.mainStackView.bottomAnchor, constant: -10),
+            self.statusTextField.leadingAnchor.constraint(equalTo: self.labelStackView.leadingAnchor),
+            self.statusTextField.trailingAnchor.constraint(equalTo: self.labelStackView.trailingAnchor),
+            self.statusTextField.heightAnchor.constraint(equalToConstant: 40),
+            
+            self.setStatusButton.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 16),
+            self.setStatusButton.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -16),
+            self.setStatusButton.heightAnchor.constraint(equalToConstant: 50),
+            self.setStatusButton.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -16),
+            self.setStatusButton.topAnchor.constraint(equalTo: self.statusTextField.bottomAnchor, constant: 16)
+        ])
+    }
+    
     
     func setupConstraints() {
         let firstStackViewTopConstraint = self.firstStackView.topAnchor.constraint(equalTo: self.topAnchor)
@@ -152,7 +269,18 @@ class ProfileTableHeaderView: UITableViewHeaderFooterView {
         ].compactMap( {$0} ))
     }
     
-    @objc func buttonAction() { 
+    @objc func buttonAction2() {
+        guard statusTextField.text != "" else {
+            statusTextField.shake()
+            return
+        }
+        statusText = self.statusTextField.text!
+        statusLabel.text = "\(statusText ?? "")"
+        self.statusTextField.text = nil
+        self.endEditing(true)
+    }
+    
+    @objc func buttonAction() {
         let topConstrain = self.statusTextField.topAnchor.constraint(equalTo: self.firstStackView.bottomAnchor, constant: -10)
         let leadingConstrain = self.statusTextField.leadingAnchor.constraint(equalTo: self.labelStackView.leadingAnchor)
         let trailingConstrain = self.statusTextField.trailingAnchor.constraint(equalTo: self.firstStackView.trailingAnchor)

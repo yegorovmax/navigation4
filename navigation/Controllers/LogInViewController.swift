@@ -12,7 +12,7 @@ import UIKit
 
 class LogInViewController: UIViewController {
     
-    let user = User(login: "a@a.aa", password: "Abcd@12345")
+    let user = User(login: "a@a.aa", password: "aa")
     
     private lazy var scrollView: UIScrollView = {
         let scrollView = UIScrollView()
